@@ -5,20 +5,25 @@ import (
 	"strings"
 )
 
+// Node is either an AndNode or OrNode in the tree.
+// The tree describes an expression of ANDs and ORs and words.
+type Node interface {
+	Expr() string
+}
+
+// AndNode expresses a set of words and OrNodes that must all match for this node to match.
 type AndNode struct {
 	Words    []string
 	Children []OrNode
 }
 
+// OrNode expresses a set of words and AndNodes of which at least one must match for this node to match.
 type OrNode struct {
 	Words    []string
 	Children []AndNode
 }
 
-type Node interface {
-	Expr() string
-}
-
+// Expr converts this node to a string.
 func (n AndNode) Expr() string {
 	var parts []string
 	for _, w := range n.Words {
@@ -30,6 +35,7 @@ func (n AndNode) Expr() string {
 	return strings.Join(parts, " AND ")
 }
 
+// Expr converts this node to a string.
 func (n OrNode) Expr() string {
 	var parts []string
 	for _, w := range n.Words {
@@ -41,6 +47,8 @@ func (n OrNode) Expr() string {
 	return strings.Join(parts, " OR ")
 }
 
+// append adds other to n and returns the new result.
+// The new node is ANDed together with the existing node.
 func (n AndNode) append(other Node) AndNode {
 	if other == nil {
 		return n
@@ -67,6 +75,8 @@ func (n AndNode) append(other Node) AndNode {
 	}
 }
 
+// append adds other to n and returns the new result.
+// The new node is ORed together with the existing node.
 func (n OrNode) append(other Node) OrNode {
 	if other == nil {
 		return n
@@ -93,6 +103,8 @@ func (n OrNode) append(other Node) OrNode {
 	}
 }
 
+// Treeify simplifies all possible options passed in into a node tree.
+// Treeify tries to make the tree as simple as possible.
 func Treeify(sequences [][]string) Node {
 	for _, o := range sequences {
 		if len(o) == 0 {
@@ -106,7 +118,7 @@ func Treeify(sequences [][]string) Node {
 	var with, without [][]string
 	for _, o := range sequences {
 		if containsWord(o, bestWord) {
-			with = append(with, withoutWord(o, bestWord))
+			with = append(with, filterWordAndImplications(o, bestWord))
 		} else {
 			without = append(without, o)
 		}
@@ -122,13 +134,17 @@ func Treeify(sequences [][]string) Node {
 	return OrNode{}.append(wn).append(won)
 }
 
+// mostCommon figures out which word is the most common among all options.
+// If a word is a substring of another word, that makes the other word considered even more common.
 func mostCommon(sequences [][]string) string {
 	words := map[string][]string{}
+	// First find all unique words.
 	for _, o := range sequences {
 		for _, w := range o {
 			words[w] = nil
 		}
 	}
+	// Now figure out for each word which words contain it as a substring.
 	for w1 := range words {
 		for w2 := range words {
 			if strings.Contains(w2, w1) {
@@ -136,6 +152,7 @@ func mostCommon(sequences [][]string) string {
 			}
 		}
 	}
+	// Now score each word a point for every possible option it is in, giving at most one point per possibility to each word.
 	scores := map[string]int{}
 	for _, o := range sequences {
 		scored := map[string]bool{}
@@ -148,6 +165,7 @@ func mostCommon(sequences [][]string) string {
 			}
 		}
 	}
+	// Find the highest scoring word in the map, breaking ties by longest word, then lexographically.
 	bestScore := 0
 	bestWord := ""
 	for w, s := range scores {
@@ -159,8 +177,8 @@ func mostCommon(sequences [][]string) string {
 	return bestWord
 }
 
-// TODO(quis): Rename for accuracy
-func withoutWord(haystack []string, needle string) []string {
+// filterWordAndImplications removes needle from haystack, and all words from haystack that are substrings of needle.
+func filterWordAndImplications(haystack []string, needle string) []string {
 	ret := make([]string, 0, len(haystack))
 	for _, e := range haystack {
 		if !strings.Contains(needle, e) {
@@ -170,6 +188,7 @@ func withoutWord(haystack []string, needle string) []string {
 	return ret
 }
 
+// containsWord returns true if needle is a substring of any word in the haystack.
 func containsWord(haystack []string, needle string) bool {
 	for _, w := range haystack {
 		if strings.Contains(w, needle) {

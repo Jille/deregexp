@@ -6,13 +6,18 @@ import (
 	"strings"
 )
 
+// part describes a part of the regexp after converting it to this simple form.
 type part interface {
 	describePart() string
 }
 
+// word is a literal.
 type word string
+// separator is one (or more) unknown characters, which we can't substring filter with, so they just separate words.
 type separator struct{}
+// orPart is the logical or of any of its subparts.
 type orPart []part
+// concatenation is a list of parts that follow directly after another.
 type concatenation []part
 
 func (w word) describePart() string    { return string(w) }
@@ -32,9 +37,11 @@ func (c concatenation) describePart() string {
 	return "(" + strings.Join(ret, ", ") + ")"
 }
 
+// stripBare takes a regexp and simplifies to down to the 4 types of `part`.
 func stripBare(re *syntax.Regexp) (retPart part) {
 	switch re.Op {
 	case syntax.OpNoMatch: // matches no strings
+		// TODO(quis): Introduce a part type for this?
 		return word("__no_matches")
 	case syntax.OpEmptyMatch: // matches empty string
 		return word("")
@@ -59,6 +66,7 @@ func stripBare(re *syntax.Regexp) (retPart part) {
 	case syntax.OpEndLine: // matches empty string at end of line
 		return separator{}
 	case syntax.OpBeginText: // matches empty string at beginning of text
+		// TODO(quis): Introduce a part type for this so we can generate SQL expressions with LIKEs that can be anchored at the start/end of a field.
 		return separator{}
 	case syntax.OpEndText: // matches empty string at end of text
 		return separator{}
@@ -76,6 +84,7 @@ func stripBare(re *syntax.Regexp) (retPart part) {
 		return orPart{stripBare(re.Sub[0]), word("")}
 	case syntax.OpRepeat: // matches Sub[0] at least Min times, at most Max (Max == -1 is no limit)
 		s := stripBare(re.Sub[0])
+		// If the difference is more than 5 we're generating too many different combinations. Just treat it as a separator rather than generating all possibilities.
 		if re.Max == -1 || re.Max-re.Min > 5 {
 			var ret concatenation
 			for i := 0; re.Min > i; i++ {
@@ -113,6 +122,7 @@ func stripBare(re *syntax.Regexp) (retPart part) {
 	}
 }
 
+// uniqueInt32 is an indiciation that Go needs generics.
 func uniqueInt32(a []int32) []int32 {
 	seen := map[int32]bool{}
 	var ret []int32
