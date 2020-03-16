@@ -68,7 +68,7 @@ func TestSequences(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed to parse regexp: %v", err)
 			}
-			p := StripBare(re)
+			p := stripBare(re)
 			seqs := flatSequences(p)
 			// TODO(quis): Ignore ordering
 			if !reflect.DeepEqual(seqs, tc.want) {

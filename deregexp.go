@@ -7,5 +7,5 @@ func Deregexp(regex string) (Node, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Treeify(flatSequences(StripBare(re))), nil
+	return Treeify(flatSequences(stripBare(re))), nil
 }

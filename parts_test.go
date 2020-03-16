@@ -38,7 +38,7 @@ func TestStripBare(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed to parse regexp: %v", err)
 			}
-			p := StripBare(re)
+			p := stripBare(re)
 			if !reflect.DeepEqual(p, tc.want) {
 				t.Errorf("mismatch: %#v; want %#v", p, tc.want)
 			}

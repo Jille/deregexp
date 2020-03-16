@@ -32,7 +32,7 @@ func (c concatenation) describePart() string {
 	return "(" + strings.Join(ret, ", ") + ")"
 }
 
-func StripBare(re *syntax.Regexp) (retPart part) {
+func stripBare(re *syntax.Regexp) (retPart part) {
 	switch re.Op {
 	case syntax.OpNoMatch: // matches no strings
 		return word("__no_matches")
@@ -67,15 +67,15 @@ func StripBare(re *syntax.Regexp) (retPart part) {
 	case syntax.OpNoWordBoundary: // matches word non-boundary `\B`
 		return word("")
 	case syntax.OpCapture: // capturing subexpression with index Cap, optional name Name
-		return StripBare(re.Sub[0])
+		return stripBare(re.Sub[0])
 	case syntax.OpStar: // matches Sub[0] zero or more times
 		return separator{}
 	case syntax.OpPlus: // matches Sub[0] one or more times
-		return concatenation{StripBare(re.Sub[0]), separator{}}
+		return concatenation{stripBare(re.Sub[0]), separator{}}
 	case syntax.OpQuest: // matches Sub[0] zero or one times
-		return orPart{StripBare(re.Sub[0]), word("")}
+		return orPart{stripBare(re.Sub[0]), word("")}
 	case syntax.OpRepeat: // matches Sub[0] at least Min times, at most Max (Max == -1 is no limit)
-		s := StripBare(re.Sub[0])
+		s := stripBare(re.Sub[0])
 		if re.Max == -1 || re.Max-re.Min > 5 {
 			var ret concatenation
 			for i := 0; re.Min > i; i++ {
@@ -99,13 +99,13 @@ func StripBare(re *syntax.Regexp) (retPart part) {
 	case syntax.OpConcat: // matches concatenation of Subs
 		var ret concatenation
 		for _, s := range re.Sub {
-			ret = append(ret, StripBare(s))
+			ret = append(ret, stripBare(s))
 		}
 		return ret
 	case syntax.OpAlternate: // matches alternation of Subs
 		var ret orPart
 		for _, s := range re.Sub {
-			ret = append(ret, StripBare(s))
+			ret = append(ret, stripBare(s))
 		}
 		return ret
 	default:
