@@ -7,19 +7,19 @@ import (
 func TestDeregexp(t *testing.T) {
 	tests := []struct {
 		input string
-		want string
+		want  string
 	}{
 		{
 			input: "Hello",
-			want: `"Hello"`,
+			want:  `"Hello"`,
 		},
 		{
 			input: "H[ae]llo",
-			want: `"Hallo" OR "Hello"`,
+			want:  `"Hallo" OR "Hello"`,
 		},
 		{
 			input: "Hello?",
-			want: `"Hell"`,
+			want:  `"Hell"`,
 		},
 		{
 			input: "Hello{3,4}",
@@ -27,15 +27,15 @@ func TestDeregexp(t *testing.T) {
 		},
 		{
 			input: "1[2b](3|c)",
-			want: `"123" OR "12c" OR "1b3" OR "1bc"`,
+			want:  `"123" OR "12c" OR "1b3" OR "1bc"`,
 		},
 		{
 			input: "1.(3|c)",
-			want: `"1" AND ("3" OR "c")`,
+			want:  `"1" AND ("3" OR "c")`,
 		},
 		{
 			input: "1.?(3|c)",
-			want: `"1" AND ("3" OR "c")`,
+			want:  `"1" AND ("3" OR "c")`,
 		},
 	}
 	for _, tc := range tests {

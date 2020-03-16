@@ -13,39 +13,39 @@ func TestSequences(t *testing.T) {
 	}{
 		{
 			input: "Hello",
-			want:  [][]string{
+			want: [][]string{
 				{"Hello"},
 			},
 		},
 		{
 			input: "Hell[o]",
-			want:  [][]string{
+			want: [][]string{
 				{"Hello"},
 			},
 		},
 		{
 			input: "Hello+",
-			want:  [][]string{
+			want: [][]string{
 				{"Hello"},
 			},
 		},
 		{
 			input: "H[ea]llo",
-			want:  [][]string{
+			want: [][]string{
 				{"Hallo"},
 				{"Hello"},
 			},
 		},
 		{
 			input: "Hello{3,4}",
-			want:  [][]string{
+			want: [][]string{
 				{"Hellooo"},
 				{"Helloooo"},
 			},
 		},
 		{
 			input: "Hello{3,4}( 123)?",
-			want:  [][]string{
+			want: [][]string{
 				{"Hellooo 123"},
 				{"Hellooo"},
 				{"Helloooo 123"},
@@ -54,7 +54,7 @@ func TestSequences(t *testing.T) {
 		},
 		{
 			input: "Hello{3,}( 123)?(456)?",
-			want:  [][]string{
+			want: [][]string{
 				{"Hellooo", " 123456"},
 				{"Hellooo", " 123"},
 				{"Hellooo", "456"},

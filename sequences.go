@@ -10,7 +10,7 @@ func (separator) isSequenceable() {}
 
 type sequence []sequenceable
 
-func  flatSequences(p part) [][]string {
+func flatSequences(p part) [][]string {
 	seqs := toSequences(concatenation{p})
 	ret := make([][]string, len(seqs))
 	for i, s := range seqs {
@@ -19,7 +19,7 @@ func  flatSequences(p part) [][]string {
 	return ret
 }
 
-func  toSequences(c concatenation) []sequence {
+func toSequences(c concatenation) []sequence {
 	ret := []sequence{sequence{}}
 	var todo []part = c
 	for len(todo) > 0 {

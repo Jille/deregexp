@@ -52,7 +52,7 @@ func (n AndNode) append(other Node) AndNode {
 		}
 	}
 	o := other.(OrNode)
-	if len(o.Words) + len(o.Children) == 1 {
+	if len(o.Words)+len(o.Children) == 1 {
 		if len(o.Words) == 1 {
 			return AndNode{
 				Words:    append(n.Words, o.Words[0]),
@@ -78,7 +78,7 @@ func (n OrNode) append(other Node) OrNode {
 		}
 	}
 	o := other.(AndNode)
-	if len(o.Words) + len(o.Children) == 1 {
+	if len(o.Words)+len(o.Children) == 1 {
 		if len(o.Words) == 1 {
 			return OrNode{
 				Words:    append(n.Words, o.Words[0]),
