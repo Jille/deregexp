@@ -13,10 +13,13 @@ type part interface {
 
 // word is a literal.
 type word string
+
 // separator is one (or more) unknown characters, which we can't substring filter with, so they just separate words.
 type separator struct{}
+
 // orPart is the logical or of any of its subparts.
 type orPart []part
+
 // concatenation is a list of parts that follow directly after another.
 type concatenation []part
 
