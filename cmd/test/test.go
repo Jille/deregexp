@@ -1,3 +1,4 @@
+// Binary test prints the expression tree from the regexp given as argv[1].
 package main
 
 import (
