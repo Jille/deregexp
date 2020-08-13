@@ -3,6 +3,7 @@ package deregexp
 import (
 	"fmt"
 	"regexp/syntax"
+	"sort"
 	"strings"
 )
 
@@ -51,7 +52,7 @@ func stripBare(re *syntax.Regexp) (retPart part) {
 	case syntax.OpLiteral: // matches Runes sequence
 		return word(re.Rune)
 	case syntax.OpCharClass: // matches Runes interpreted as range pair list
-		rs := uniqueInt32(re.Rune)
+		rs := expandRanges(re.Rune)
 		if len(rs) > 5 {
 			return separator{}
 		}
@@ -125,15 +126,23 @@ func stripBare(re *syntax.Regexp) (retPart part) {
 	}
 }
 
-// uniqueInt32 is an indiciation that Go needs generics.
-func uniqueInt32(a []int32) []int32 {
-	seen := map[int32]bool{}
-	var ret []int32
-	for _, e := range a {
-		if !seen[e] {
-			ret = append(ret, e)
-			seen[e] = true
+// expandRanges expands ranges from a character class to the full set.
+func expandRanges(rs []int32) []int32 {
+	ret := map[int32]bool{}
+	for i, s := range rs {
+		if i%2 == 1 {
+			continue
+		}
+		for c := s; rs[i+1] >= c; c++ {
+			ret[c] = true
 		}
 	}
-	return ret
+	out := make([]int32, 0, len(ret))
+	for c := range ret {
+		out = append(out, c)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		return out[i] < out[j]
+	})
+	return out
 }

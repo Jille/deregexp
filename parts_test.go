@@ -31,6 +31,18 @@ func TestStripBare(t *testing.T) {
 			input: "Hello{3,4}",
 			want:  concatenation{word("Hell"), orPart{concatenation{word("o"), word("o"), word("o")}, concatenation{word("o"), word("o"), word("o"), word("o")}}},
 		},
+		{
+			input: "a[0-9]b",
+			want:  concatenation{word("a"), separator{}, word("b")},
+		},
+		{
+			input: "[0-3]",
+			want:  orPart{word("0"), word("1"), word("2"), word("3")},
+		},
+		{
+			input: "[0124]",
+			want:  orPart{word("0"), word("1"), word("2"), word("4")},
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.input, func(t *testing.T) {
